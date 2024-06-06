@@ -15,11 +15,9 @@ from langchain.prompts.chat import (
 import os
 import tempfile
 import PyPDF2
-from googletrans import Translator
+ 
 from transformers import pipeline
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+ 
 import logging
 from langchain_community.llms import LlamaCpp
 from langchain.chat_models import ChatOpenAI
