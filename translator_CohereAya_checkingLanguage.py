@@ -136,7 +136,7 @@ class Translation_Pipeline:
 
 
         # create the chat model
-        llm =  Ollama(model="mixtral", temperature=0.3)
+        llm =  Ollama(model="aya:35b", temperature=0.3)
 
 
  
@@ -185,7 +185,7 @@ class Translation_Pipeline:
         for filename in os.listdir(self.splited_file_directory):
             if filename.endswith('.pdf'):
                 input_pdf_path = os.path.join(self.splited_file_directory, filename)
-                output_text_path = os.path.join(self.translated_file_directory, os.path.splitext(filename)[0] + '_translated_mixtral.txt')
+                output_text_path = os.path.join(self.translated_file_directory, os.path.splitext(filename)[0] + '_translated_aya35b.txt')
                 translated_text = self.translate_pdf_to_text(input_pdf_path)
                 # Save translated text to a text file
                 with open(output_text_path, 'w', encoding='utf-8') as output_file:
@@ -231,9 +231,9 @@ def split_pdf_and_detect_language(pdf_file):
 def main():
     
 
-    pdf_file = 'documents/Roesch_PotenzialeUndStrategienZurOptimierungDesSchablonendruckprozesses.pdf'
+    pdf_file = '/home/zeinab/Thesis_RAG_Optimization/documents/12407_154_Ruediger_Holzmann_web1.pdf'
     split_output_dir = 'Splited-Pdfs'
-    translated_file_dir ='translatedPDF'
+    translated_file_dir ='aya_translatedPDF'
     corpus_directory='corpus' 
     languages = split_pdf_and_detect_language(pdf_file)
     if languages!='en':
