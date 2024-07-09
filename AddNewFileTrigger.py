@@ -25,7 +25,7 @@ from PyPDF2 import PdfFileReader
 from io import BytesIO
     
 load_dotenv()
-#
+# connectio to server
 SERVER_IP = os.getenv('SERVER_IP')
 SERVER_PORT = int(os.getenv('SERVER_PORT', 22))
 USERNAME = os.getenv('USERNAME')
