@@ -1,5 +1,3 @@
-
-
 ######################################
 from langchain_community.llms import LlamaCpp
 from langchain.chat_models import ChatOpenAI
@@ -11,7 +9,7 @@ import csv
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.vectorstores import Chroma
 from langchain_community import embeddings
-from langchain_community.llms import Ollama
+from langchain_community.llms import Ollima
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -37,11 +35,13 @@ from langchain_community.llms import LlamaCpp
 normal_context=[]
 stepback_context=[]
 stepback_question=[]
-llm =  Ollama(model="mixtral")
+qlist = []
+llm =  Ollima(model="mixtral")
 #####################################
 
 def _parse(text):
-    return text.strip("**")
+    """Remove trailing '**' from step-back question."""
+    return text.strip("**").strip()
 
 def june_print(msg, res):
     print('-' * 100)
@@ -49,7 +49,7 @@ def june_print(msg, res):
     print(res)
 ######################################
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vector_store1=FAISS.load_local("simpleDB" , embeddings, allow_dangerous_deserialization=True)
+vector_store = FAISS.load_local("simpleDB" , embeddings, allow_dangerous_deserialization=True)
 ######################################
 # step back section
 
@@ -77,9 +77,10 @@ response_prompt = ChatPromptTemplate.from_template(response_prompt_template)
 
 #################################################################################
 def retriever(question):
-      myretriever = vector_store1.as_retriever(k=2)
-      context = myretriever.invoke(question)
-      return context
+    """Retrieve relevant documents for a question."""
+    myretriever = vector_store.as_retriever(k=2)
+    docs = myretriever.invoke(question)
+    return docs
  ###########################################################################
 def save_retriever(docs):# to save related context
    # contextlist.append("\n\n".join(doc.page_content for doc in docs))
@@ -130,7 +131,7 @@ while True:
     header = ['OriginalQuery', 'Stepback_Query', 'normal_Context', 'Stepback_context']
 
     # Write the rows to the CSV file
-    with open(csv_file, mode='w', newline='') as file:
+    with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(header)  # Write the header
         writer.writerows(rows)   # Write the rows

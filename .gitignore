@@ -1,8 +1,18 @@
-GermanStories/
-simpleDB/
-Split-pdf/
-documents/
-aya_translatedPDF/
-finish-translation/
-translatedPDF/
-Splited-Pdfs/
+# Ignore data and output folders
+
+
+# Ignore new recommended data folders
+data/
+data/raw_pdfs/
+data/processed_pdfs/
+data/translated_texts/
+data/vector_db/
+
+# Ignore Python cache and environment files
+__pycache__/
+*.pyc
+*.pyo
+*.env
+.env
+.venv/
+venv/

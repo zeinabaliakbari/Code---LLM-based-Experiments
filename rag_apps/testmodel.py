@@ -27,26 +27,34 @@ from langchain.document_loaders import PyPDFDirectoryLoader
 
 
 
-llm= Ollama(model="mixtral")
-loader = PyPDFDirectoryLoader("GermanStories")
-data = loader.load()
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+def main():
+    llm = Ollama(model="mixtral")
+    loader = PyPDFDirectoryLoader("GermanStories")
+    data = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
+    text_chunks = text_splitter.split_documents(data)
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    vector_store = FAISS.from_documents(text_chunks, embedding=embeddings)
+    vector_store.save_local("simpleDB")  # Save DB to local disk
 
-text_chunks = text_splitter.split_documents(data)
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")    
-vector_store = FAISS.from_documents(text_chunks, embedding=embeddings)
-vector_store.save_local("simpleDB") # save DB in local disk
+    # To load from disk in the future:
+    # vector_store = FAISS.load_local("simpleDB", embeddings, allow_dangerous_deserialization=True)
 
-#embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-#vector_store1=FAISS.load_local("simpleDB" , embeddings, allow_dangerous_deserialization=True) #if you want to load db from disk, --- allow_dangerous_deserialization=True ---otherwise use vector_store in the nxt cell
-qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=vector_store.as_retriever(search_kwargs={"k": 2})) 
+    qa = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=vector_store.as_retriever(search_kwargs={"k": 2})
+    )
 
-while True:
-  user_input = input(f"Input Prompt: ")
-  if user_input == 'exit':
-    print('Exiting')
-    sys.exit()
-  if user_input == '':
-    continue
-  result = qa({'query': user_input})
-  print(f"Answer: {result['result']}")
+    while True:
+        user_input = input("Input Prompt: ")
+        if user_input.lower() == 'exit':
+            print('Exiting')
+            sys.exit()
+        if not user_input.strip():
+            continue
+        result = qa({'query': user_input})
+        print(f"Answer: {result['result']}")
+
+if __name__ == "__main__":
+    main()

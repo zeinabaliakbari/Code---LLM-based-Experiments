@@ -1,34 +1,32 @@
+import os
+import tempfile
 import streamlit as st
 from streamlit_chat import message
 from langchain.chains import ConversationalRetrievalChain
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import LlamaCpp
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
+from langchain_community.llms import Ollama
 from langchain.memory import ConversationBufferMemory
 from langchain_community.document_loaders import PyPDFLoader
-import os
-import tempfile
-
-
-
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
 
 def initialize_session_state():
+    """Initialize Streamlit session state variables."""
     if 'history' not in st.session_state:
         st.session_state['history'] = []
-
     if 'generated' not in st.session_state:
         st.session_state['generated'] = ["Hello! Ask me anything about your documents."]
-
     if 'past' not in st.session_state:
         st.session_state['past'] = ["Hey! 👋"]
 
 def conversation_chat(query, chain, history):
+    """Run a conversational query and update history."""
     result = chain({"question": query, "chat_history": history})
     history.append((query, result["answer"]))
     return result["answer"]
 
 def display_chat_history(chain):
+    """Display chat history and handle user input."""
     reply_container = st.container()
     container = st.container()
 
@@ -40,7 +38,6 @@ def display_chat_history(chain):
         if submit_button and user_input:
             with st.spinner('Generating response...'):
                 output = conversation_chat(user_input, chain, st.session_state['history'])
-
             st.session_state['past'].append(user_input)
             st.session_state['generated'].append(output)
 
@@ -51,31 +48,23 @@ def display_chat_history(chain):
                 message(st.session_state["generated"][i], key=str(i), avatar_style="fun-emoji")
 
 def create_conversational_chain(vector_store):
-    # load the model
-    llm = LlamaCpp(
-    streaming = True,
-    model_path="models/Meta-Llama-3-70B-Instruct-Q4_K_M.gguf", 
-    temperature=0.75,
-    top_p=1, 
-    verbose=True,
-    n_ctx=4096
-)
-    
+    """Create a conversational retrieval chain with Mixtral and memory."""
+    llm = Ollama(model="mixtral")
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-    chain = ConversationalRetrievalChain.from_llm(llm=llm, chain_type='stuff',
-                                                 retriever=vector_store.as_retriever(search_kwargs={"k": 2}),
-                                                 memory=memory)
+    chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        chain_type='stuff',
+        retriever=vector_store.as_retriever(search_kwargs={"k": 2}),
+        memory=memory
+    )
     return chain
 
 def main():
-    # Initialize session state
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     initialize_session_state()
-    st.title("Multi-PDF RAG using mistral-7b-instruct-v0.1.Q5_K_M.gguf :books:")
-    # Initialize Streamlit
+    st.title("Multi-PDF RAG using Mixtral :books:")
     st.sidebar.title("Document Processing")
     uploaded_files = st.sidebar.file_uploader("Upload files", accept_multiple_files=True)
-
 
     if uploaded_files:
         text = []
@@ -93,20 +82,15 @@ def main():
                 text.extend(loader.load())
                 os.remove(temp_file_path)
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=20)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         text_chunks = text_splitter.split_documents(text)
 
-        # Create embeddings
-        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2", 
-                                           model_kwargs={'device': 'cpu'})
-
-        # Create vector store
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={'device': 'cpu'}
+        )
         vector_store = FAISS.from_documents(text_chunks, embedding=embeddings)
-
-        # Create the chain object
         chain = create_conversational_chain(vector_store)
-
-        
         display_chat_history(chain)
 
 if __name__ == "__main__":
