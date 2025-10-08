@@ -1,0 +1,115 @@
+
+-Goal-
+Given a text document that is potentially relevant to this activity and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities.
+
+-Steps-
+1. Identify all entities. For each identified entity, extract the following information:
+- entity_name: Name of the entity, capitalized
+- entity_type: One of the following types: [{entity_types}]
+- entity_description: Comprehensive description of the entity's attributes and activities
+Format each entity as ("entity"{tuple_delimiter}<entity_name>{tuple_delimiter}<entity_type>{tuple_delimiter}<entity_description>
+
+2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
+For each pair of related entities, extract the following information:
+- source_entity: name of the source entity, as identified in step 1
+- target_entity: name of the target entity, as identified in step 1
+- relationship_description: explanation as to why you think the source entity and the target entity are related to each other
+- relationship_strength: a numeric score indicating strength of the relationship between the source entity and target entity
+ Format each relationship as ("relationship"{tuple_delimiter}<source_entity>{tuple_delimiter}<target_entity>{tuple_delimiter}<relationship_description>{tuple_delimiter}<relationship_strength>)
+
+3. Return output in English as a single list of all the entities and relationships identified in steps 1 and 2. Use **{record_delimiter}** as the list delimiter.
+
+4. When finished, output {completion_delimiter}
+
+######################
+-Examples-
+######################
+Example 1:
+
+Entity_types: [resource, machine, material, method, measurement]
+Text:
+'The periphery auxiliary equipment is consuming electrical energy to supply the demanded resources by the oven. The accumulation of auxiliary power consumption for the oven technology is obtaining the total power consumption of the system. 
+The total power consumption is correlated to production lead-time per product. Hence, by mapping the resource flow into the oven, the corresponding electrical energy consumption of the supply systems in the periphery levels are investigated, 
+and the analysis is followed by the cost calculation per PCB.'
+################
+Output:
+("entity"{tuple_delimiter}"Periphery Auxiliary Equipment"{tuple_delimiter}"machine"{tuple_delimiter}"Equipment that consumes electrical energy to supply resources to the oven.")#
+("entity"{tuple_delimiter}"Electrical Energy"{tuple_delimiter}"resource"{tuple_delimiter}"Energy consumed by the periphery auxiliary equipment.")#
+("entity"{tuple_delimiter}"Oven"{tuple_delimiter}"machine"{tuple_delimiter}"The main machine demanding resources supplied by the auxiliary equipment.")#
+("entity"{tuple_delimiter}"Oven Technology"{tuple_delimiter}"method"{tuple_delimiter}"Technology related to the oven and its power consumption.")#
+("entity"{tuple_delimiter}"Total Power Consumption"{tuple_delimiter}"measurement"{tuple_delimiter}"The accumulated power consumption of the system, including auxiliary equipment.")#
+("entity"{tuple_delimiter}"Production Lead-Time"{tuple_delimiter}"measurement"{tuple_delimiter}"The time required to produce one product.")#
+("entity"{tuple_delimiter}"Resource Flow"{tuple_delimiter}"method"{tuple_delimiter}"The flow of resources into the oven for production.")#
+("entity"{tuple_delimiter}"Supply Systems"{tuple_delimiter}"machine"{tuple_delimiter}"Systems in the periphery levels that supply resources and consume electrical energy.")#
+("entity"{tuple_delimiter}"Cost Calculation"{tuple_delimiter}"method"{tuple_delimiter}"The process of calculating costs per PCB.")#
+("entity"{tuple_delimiter}"PCB"{tuple_delimiter}"item"{tuple_delimiter}"Printed Circuit Board, the final product of the production process.")#
+("relationship"{tuple_delimiter}"Periphery Auxiliary Equipment"{tuple_delimiter}"Electrical Energy"{tuple_delimiter}"The periphery auxiliary equipment consumes electrical energy."{tuple_delimiter}7)#
+("relationship"{tuple_delimiter}"Periphery Auxiliary Equipment"{tuple_delimiter}"Oven"{tuple_delimiter}"The auxiliary equipment supplies resources to the oven."{tuple_delimiter}8)#
+("relationship"{tuple_delimiter}"Oven Technology"{tuple_delimiter}"Total Power Consumption"{tuple_delimiter}"Oven technology's auxiliary power consumption contributes to the total power consumption."{tuple_delimiter}9)#
+("relationship"{tuple_delimiter}"Total Power Consumption"{tuple_delimiter}"Production Lead-Time"{tuple_delimiter}"The total power consumption is correlated to production lead-time per product."{tuple_delimiter}10)#
+("relationship"{tuple_delimiter}"Resource Flow"{tuple_delimiter}"Oven"{tuple_delimiter}"Mapping the resource flow into the oven helps investigate electrical energy consumption."{tuple_delimiter}11)#
+("relationship"{tuple_delimiter}"Supply Systems"{tuple_delimiter}"Electrical Energy"{tuple_delimiter}"Supply systems in the periphery levels consume electrical energy."{tuple_delimiter}12)#
+("relationship"{tuple_delimiter}"Cost Calculation"{tuple_delimiter}"PCB"{tuple_delimiter}"The analysis includes cost calculation per PCB."{tuple_delimiter}13)#
+#############################
+Example 2:
+
+Entity_types: [resource, machine, material, method, measurement]
+Text:
+The molten solder is isolated within the network of primary tin dendrites and therefore the solidification and reduction of the volume delivers accommodated voids. Voids created in this process are obtained irregular shape that reflects
+ the shape of the solidification front that formed them. If the reduction of volume is extreme, the shrinkage of the voids could intersect the surface of the solder joint which appears as crack cavity or shrink hole."
+#############
+Output:
+("entity"{tuple_delimiter}"Molten Solder"{tuple_delimiter}"material"{tuple_delimiter}"Solder in its molten state during the manufacturing process.")#
+("entity"{tuple_delimiter}"Primary Tin Dendrites"{tuple_delimiter}"material"{tuple_delimiter}"Network structures within which the molten solder is isolated.")#
+("entity"{tuple_delimiter}"Solidification"{tuple_delimiter}"method"{tuple_delimiter}"The process by which the molten solder solidifies.")#
+("entity"{tuple_delimiter}"Volume Reduction"{tuple_delimiter}"method"{tuple_delimiter}"The reduction of volume during the solidification of molten solder.")#
+("entity"{tuple_delimiter}"Voids"{tuple_delimiter}"object"{tuple_delimiter}"Irregularly shaped voids created during the solidification process.")#
+("entity"{tuple_delimiter}"Solidification Front"{tuple_delimiter}"method"{tuple_delimiter}"The boundary at which the molten solder solidifies, influencing the shape of voids.")#
+("entity"{tuple_delimiter}"Solder Joint"{tuple_delimiter}"object"{tuple_delimiter}"The joint formed by soldering, which may develop voids or cracks if volume reduction is extreme.")#
+("entity"{tuple_delimiter}"Crack Cavity"{tuple_delimiter}"object"{tuple_delimiter}"A type of defect that may appear on the surface of a solder joint due to extreme volume reduction.")#
+("entity"{tuple_delimiter}"Shrink Hole"{tuple_delimiter}"object"{tuple_delimiter}"Another type of defect that may appear on the surface of a solder joint due to extreme volume reduction.")#
+("relationship"{tuple_delimiter}"Molten Solder"{tuple_delimiter}"Primary Tin Dendrites"{tuple_delimiter}"The molten solder is isolated within the network of primary tin dendrites."{tuple_delimiter}7)#
+("relationship"{tuple_delimiter}"Solidification"{tuple_delimiter}"Molten Solder"{tuple_delimiter}"Solidification is the process by which molten solder transitions to a solid state."{tuple_delimiter}8)#
+("relationship"{tuple_delimiter}"Volume Reduction"{tuple_delimiter}"Solidification"{tuple_delimiter}"The reduction of volume occurs during the solidification of molten solder."{tuple_delimiter}9)#
+("relationship"{tuple_delimiter}"Voids"{tuple_delimiter}"Solidification"{tuple_delimiter}"Voids are created during the solidification process."{tuple_delimiter}10)#
+("relationship"{tuple_delimiter}"Voids"{tuple_delimiter}"Solidification Front"{tuple_delimiter}"The shape of the voids reflects the shape of the solidification front that formed them."{tuple_delimiter}11)#
+("relationship"{tuple_delimiter}"Shrink Hole"{tuple_delimiter}"Solder Joint"{tuple_delimiter}"Shrink holes appear as defects on the surface of a solder joint due to extreme volume reduction."{tuple_delimiter}12)#
+("relationship"{tuple_delimiter}"Crack Cavity"{tuple_delimiter}"Solder Joint"{tuple_delimiter}"Crack cavities appear as defects on the surface of a solder joint due to extreme volume reduction."{tuple_delimiter}13)#
+
+#############################
+Example 3:
+
+Entity_types: [resource, machine, material, method, measurement]
+Text:
+The main difference between laminography and tomography is that in the former one the rotation axis of the sample is not perpendicular to the x-ray beam and the algorithm is developed for imaging regions 
+of interest (ROI) in flat, especially.
+Before the start of the accelerated EM tests, the solder joints were scanned for initial imaging in 3D as reference. 
+After a given hours of EM stressing, the samples were re-scanned to check the changes inside
+#############
+Output:
+("entity"{tuple_delimiter}"Laminography"{tuple_delimiter}"method"{tuple_delimiter}"An imaging technique where the rotation axis of the sample is not perpendicular to the x-ray beam, developed for imaging regions of interest in flat objects.")#
+("entity"{tuple_delimiter}"Tomography"{tuple_delimiter}"method"{tuple_delimiter}"An imaging technique generally used for obtaining 3D images of an object, where the rotation axis is perpendicular to the x-ray beam.")#
+("entity"{tuple_delimiter}"Rotation Axis"{tuple_delimiter}"measurement"{tuple_delimiter}"The axis around which the sample rotates during imaging.")#
+("entity"{tuple_delimiter}"X-ray Beam"{tuple_delimiter}"resource"{tuple_delimiter}"The beam used in laminography and tomography for imaging.")#
+("entity"{tuple_delimiter}"Algorithm"{tuple_delimiter}"method"{tuple_delimiter}"The computational method developed for imaging regions of interest in laminography.")#
+("entity"{tuple_delimiter}"Regions of Interest (ROI)"{tuple_delimiter}"object"{tuple_delimiter}"Specific areas within a sample that are the focus of imaging.")#
+("entity"{tuple_delimiter}"Accelerated EM Tests"{tuple_delimiter}"method"{tuple_delimiter}"Tests that apply accelerated electromigration stress to solder joints.")#
+("entity"{tuple_delimiter}"Solder Joints"{tuple_delimiter}"object"{tuple_delimiter}"The joints that are scanned for initial and subsequent imaging.")#
+("entity"{tuple_delimiter}"3D Imaging"{tuple_delimiter}"method"{tuple_delimiter}"A technique used to create three-dimensional images of the solder joints.")#
+("entity"{tuple_delimiter}"Samples"{tuple_delimiter}"item"{tuple_delimiter}"The samples that undergo EM stressing and imaging.")#
+("relationship"{tuple_delimiter}"Laminography"{tuple_delimiter}"X-ray Beam"{tuple_delimiter}"In laminography, the rotation axis of the sample is not perpendicular to the x-ray beam."{tuple_delimiter}7)#
+("relationship"{tuple_delimiter}"Laminography"{tuple_delimiter}"Algorithm"{tuple_delimiter}"The algorithm in laminography is developed for imaging regions of interest in flat objects."{tuple_delimiter}8)#
+("relationship"{tuple_delimiter}"Laminography"{tuple_delimiter}"Regions of Interest (ROI)"{tuple_delimiter}"Laminography is used for imaging regions of interest in flat objects."{tuple_delimiter}9)#
+("relationship"{tuple_delimiter}"Tomography"{tuple_delimiter}"X-ray Beam"{tuple_delimiter}"In tomography, the rotation axis of the sample is perpendicular to the x-ray beam."{tuple_delimiter}10)#
+("relationship"{tuple_delimiter}"Accelerated EM Tests"{tuple_delimiter}"Solder Joints"{tuple_delimiter}"Solder joints are subjected to accelerated EM tests."{tuple_delimiter}11)#
+("relationship"{tuple_delimiter}"Solder Joints"{tuple_delimiter}"3D Imaging"{tuple_delimiter}"Solder joints are scanned for initial imaging in 3D as a reference."{tuple_delimiter}12)#
+("relationship"{tuple_delimiter}"Accelerated EM Tests"{tuple_delimiter}"Samples"{tuple_delimiter}"Samples undergo accelerated EM stressing and subsequent re-scanning."{tuple_delimiter}13)#
+("relationship"{tuple_delimiter}"3D Imaging"{tuple_delimiter}"Samples"{tuple_delimiter}"Samples are initially imaged in 3D to provide a reference before EM stressing."{tuple_delimiter}14)#
+
+#############################
+-Real Data-
+######################
+Entity_types: {entity_types}
+Text: {input_text}
+######################
+Output:
